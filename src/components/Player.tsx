@@ -8,7 +8,8 @@ export function Player() {
     const currentSongVal = useAtomValue(currentSong)
     const [currentSongProgress, setCurrentSongProgress] = useState("");
     const [currentSongVolume, setCurrentSongVolume] = useState<number>(100)
-
+    const [isMuted, setIsMuted] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
 // Update Song Percent
     useEffect(() => {
         if (!currentSongVal) return;
@@ -31,18 +32,37 @@ export function Player() {
 
     function play() {
         if (!currentSongVal) return;
-        
+        if (currentSongVal.playing()) return;
+        currentSongVal.play()
+        setIsPlaying(currentSongVal.playing())
+    }
+
+    function pause() {
+        if (!currentSongVal) return;
+        if (!currentSongVal.playing()) return;
+        currentSongVal.pause()
+        setIsPlaying(currentSongVal.playing())
+    }
+
+    function mute () {
+        if (!currentSongVal) return;
+        setIsMuted(currentSongVal.mute())
+    }
+
+    function seekSong(percentage: number) {
+        if (!currentSongVal) return;
+        currentSongVal.seek(getSecondsFromPercentage(currentSongVal.duration(), percentage))
     }
 
     return (
         <>
-            <h1>Duration {formatTime(currentSongVal?.duration() || 0)} S: {currentSongVal?.duration()}</h1>
+            <h1>Duration M: {formatTime(currentSongVal?.duration() || 0)} S: {currentSongVal?.duration()}</h1>
             <h1>Progress {currentSongProgress}</h1>
-            <button onClick={() => currentSongVal?.play()}>Play</button>
-            <button onClick={() => currentSongVal?.pause()}>Pause</button>
-            <Slider value={Number(currentSongProgress)} onChange={(v) => {
-                currentSongVal?.seek(getSecondsFromPercentage(currentSongVal?.duration(), v))
-            }}/>
+            <h1>Is Playing?: {isPlaying}</h1>
+            <button onClick={play}>Play</button>
+            <button onClick={pause}>Pause</button>
+            <button onClick={mute}>{isMuted ? "unMute" : "Mute"}</button>
+            <Slider value={Number(currentSongProgress)} onChange={seekSong}/>
             <h1>Volume</h1>
             <Slider value={currentSongVolume} onChange={setCurrentSongVolume}/>
         </>
