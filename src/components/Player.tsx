@@ -16,6 +16,7 @@ export function Player() {
         const progressInterval = setInterval(() => {
             setCurrentSongProgress(getSongPercent(currentSongVal))
         }, 100)
+        play()
         return () => {
             clearInterval(progressInterval);
             if (!currentSongVal) return
@@ -44,9 +45,11 @@ export function Player() {
         setIsPlaying(currentSongVal.playing())
     }
 
-    function mute () {
+    function mute() {
         if (!currentSongVal) return;
-        setIsMuted(currentSongVal.mute())
+        const isMuted = currentSongVal.mute()
+        currentSongVal.mute(!isMuted)
+        setIsMuted(!isMuted)
     }
 
     function seekSong(percentage: number) {
