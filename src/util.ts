@@ -9,3 +9,7 @@ export function formatTime(secs: number) {
 export function getSongPercent(song: Howl) {
     return ((((song.seek() || 0) / (song.duration() || 1)) * 100) || 0).toFixed(2)
 }
+
+export function getSecondsFromPercentage(duration: number, percentage: number) {
+    return (duration) * (percentage / 100)
+}
