@@ -6,7 +6,7 @@ import {useAtomValue} from "jotai/index";
 
 export function PlaylistDrawer() {
   const [isOpen, setIsOpen] = useAtom(globalPlaylistDrawerOpened)
-  const [playlist, setPlaylist] = useAtom(globalSongsPlaylist);
+  const playlist = useAtomValue(globalSongsPlaylist);
   const currentSongDet = useAtomValue(globalCurrentSongDetails);
   return (
     <Drawer opened={isOpen} onClose={() => setIsOpen(false)} withCloseButton={false} position={"right"}

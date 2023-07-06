@@ -8,6 +8,8 @@ import {
 import {useEffect, useState} from "react";
 import Song from "../types/song.ts";
 import {Howl} from "howler";
+import {SongsListSong} from "./SongsListSong.tsx";
+import {Grid} from "@mantine/core";
 
 export function SongsList() {
   const pb = useAtomValue(globalPocketbase);
@@ -35,12 +37,12 @@ export function SongsList() {
 
   return (
     <div>
+      <Grid>
+
       {songs.map((s) => <div key={s.id}>
-        <h1>{s.name}</h1>
-        <h2>{s.artist}</h2>
-        <button onClick={() => playSong(s)}>Play</button>
-        <button onClick={() => setPlaylist((prev) => [...prev, s])} >Add to playlist</button>
+        <SongsListSong song={s} onPlayClick={() => playSong(s)} onPlaylistAddClick={() => setPlaylist((prev) => [...prev, s])}/>
       </div>)}
+      </Grid>
     </div>
   )
 }
