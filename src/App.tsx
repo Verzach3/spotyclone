@@ -3,12 +3,13 @@ import {SongsList} from "./components/SongsList.tsx";
 
 function App() {
 
-    return (
-        <>
-            <SongsList/>
-            <Player/>
-        </>
-    )
+  return (
+    <>
+      <SongsList/>
+      <Player/>
+
+    </>
+  )
 }
 
 export default App
