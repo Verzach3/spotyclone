@@ -3,6 +3,7 @@ import {useAtom} from "jotai";
 import {globalCurrentSongDetails, globalPlaylistDrawerOpened, globalSongsPlaylist} from "../globalState.ts";
 import {PlaylistSong} from "./PlaylistSong.tsx";
 import {useAtomValue} from "jotai/index";
+import {nanoid} from "nanoid";
 
 export function PlaylistDrawer() {
   const [isOpen, setIsOpen] = useAtom(globalPlaylistDrawerOpened)
@@ -16,14 +17,14 @@ export function PlaylistDrawer() {
           Reproduciendo Actualmente
         </Text>
         {currentSongDet &&
-            <PlaylistSong song={currentSongDet}/>
+            <PlaylistSong song={currentSongDet} key={nanoid()}/>
         }
         {playlist.length > 0 && <Text>
             A continuacion
         </Text>
         }
         {playlist.length > 0 && playlist.map((song) =>
-          <PlaylistSong song={song}/>
+          <PlaylistSong song={song} key={nanoid()}/>
         )}
       </Stack>
     </Drawer>

@@ -41,8 +41,12 @@ export function Player() {
     }, 100)
     currentSongInst.on("end", () => {
       console.log("song end")
-      setCurrentSongInst(undefined)
-      setCurrentSongDet(undefined);
+      if (playlist.length > 0) {
+        setCurrentSongInst(undefined)
+        setCurrentSongDet(undefined);
+        return
+      }
+      setIsPlaying(currentSongInst.playing())
     })
     play()
     return () => {
@@ -116,10 +120,12 @@ export function Player() {
 
   return (
     <Affix bottom={0} style={{width: "100% "}}>
+      <div style={{ backgroundColor: "#1A1B1E"}}>
+
       <Stack spacing={0} style={{paddingBottom: "1em"}}>
         <Center inline style={{justifyContent: "space-evenly"}}>
           <Text style={{marginLeft: "0.3em"}}>{secondsToStyledTime(currentSongProgressSeconds)}</Text>
-          <Slider thumbChildren={<IconMusic/>} value={Number(currentSongProgress)} onChangeEnd={seekSong}
+          <Slider value={Number(currentSongProgress)} onChangeEnd={seekSong}
                   label={(v) => secondsToStyledTime(getSecondsFromPercentage(currentSongInst?.duration() || 0, v))}
                   color={"green"}
                   style={{width: "100%", marginInline: "0.3em"}}/>
@@ -149,7 +155,11 @@ export function Player() {
           <ActionIcon onClick={togglePlay} variant={"filled"} radius={"xl"} size={"xl"}>
             {!isPlaying ? <IconPlayerPlayFilled/> : <IconPlayerPauseFilled/>}
           </ActionIcon>
-          <ActionIcon onClick={togglePlay}>
+          <ActionIcon onClick={() => {
+            if (playlist.length > 0) {
+              advanceInPlayList()
+            }
+          }}>
             <IconPlayerSkipForward/>
           </ActionIcon>
           <Center inline style={{width: "10em", marginRight: "1em"}}>
@@ -159,10 +169,11 @@ export function Player() {
             <ActionIcon onClick={mute}>
               {isMuted ? <IconVolumeOff/> : <IconVolume/>}
             </ActionIcon>
-            <Slider value={currentSongVolume} onChangeEnd={setCurrentSongVolume} style={{width: "100%"}}/>
+            <Slider value={currentSongVolume} onChange={setCurrentSongVolume} style={{width: "100%"}}/>
           </Center>
         </Center>
       </Stack>
+      </div>
     </Affix>
   )
 }

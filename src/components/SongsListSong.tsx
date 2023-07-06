@@ -6,7 +6,7 @@ export function SongsListSong({song, onPlayClick, onPlaylistAddClick}: { song: S
   return (
     <Card p={0} style={{marginInline: "2em", marginTop: "2em", marginBottom: "1em", backgroundColor: "#1A1B1E"}}>
       <Stack>
-        <ThemeIcon size={200}>
+        <ThemeIcon size={300}>
           <IconMusic/>
         </ThemeIcon>
 
