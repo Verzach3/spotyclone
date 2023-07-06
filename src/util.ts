@@ -18,7 +18,13 @@ export function getSecondsFromPercentage(duration: number, percentage: number) {
 export function secondsToStyledTime(seconds: number) {
   return (seconds / 60).toFixed(2).split(".").map((v, i) => {
     if (i === 0) return v;
-    return Math.trunc(Number(v) * 0.6)
+    let truncated = Math.trunc(Number(v) * 0.6).toString()
+    if (truncated.length < 2) {
+      const truncatedsplit = truncated.split("")
+      truncatedsplit.unshift("0");
+      truncated = truncatedsplit.join("");
+    }
+    return truncated
   }).join(":")
 }
 

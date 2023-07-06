@@ -1,13 +1,14 @@
 import {useAtomValue, useSetAtom} from "jotai/index";
-import {currentSong, globalPocketbase} from "../globalState.ts";
+import {currentSongDetails, currentSongInstance, globalPocketbase} from "../globalState.ts";
 import {useEffect, useState} from "react";
 import Song from "../types/song.ts";
 import {Howl} from "howler";
 
 export function SongsList() {
   const pb = useAtomValue(globalPocketbase);
-  const setCurrentSong = useSetAtom(currentSong)
-  const [currentPage, setCurrentPage] = useState(1)
+  const setCurrentSongInst = useSetAtom(currentSongInstance)
+  const setCurrentSongDet= useSetAtom(currentSongDetails)
+  const [currentPage, ] = useState(1)
   const [songs, setSongs] = useState<Song[]>([]);
   useEffect(() => {
     getSongs()
@@ -20,9 +21,10 @@ export function SongsList() {
 
   async function playSong(song: Song) {
     const url = pb.getFileUrl(song as never, song.song)
-    setCurrentSong(new Howl({
+    setCurrentSongInst(new Howl({
       src: [url]
     }))
+    setCurrentSongDet(song);
   }
 
   return (
