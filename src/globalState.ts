@@ -5,5 +5,7 @@ import {Howl} from "howler";
 import Song from "./types/song.ts"
 
 export const globalPocketbase = atom(new Pocketbase(serverURL))
-export const currentSongInstance = atom<Howl | undefined>(undefined)
-export const currentSongDetails = atom<Song | undefined>(undefined);
+export const globalCurrentSongInstance = atom<Howl | undefined>(undefined)
+export const globalCurrentSongDetails = atom<Song | undefined>(undefined);
+export const globalPlaylistDrawerOpened = atom<boolean>(false)
+export const globalSongsPlaylist = atom<Song[]>([])

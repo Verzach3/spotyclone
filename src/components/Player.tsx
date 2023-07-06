@@ -1,9 +1,15 @@
-import {useAtomValue} from "jotai/index";
-import {currentSongDetails, currentSongInstance} from "../globalState.ts";
+import {useAtomValue, useSetAtom} from "jotai/index";
+import {
+  globalCurrentSongDetails,
+  globalCurrentSongInstance,
+  globalPlaylistDrawerOpened, globalPocketbase,
+  globalSongsPlaylist
+} from "../globalState.ts";
 import {useEffect, useState} from "react";
 import {formatTime, getSecondsFromPercentage, getSongPercent, secondsToStyledTime} from "../util.ts";
 import {ActionIcon, Affix, Avatar, Center, Slider, Stack, Text} from "@mantine/core";
 import {
+  IconMenu2,
   IconMusic,
   IconPlayerPauseFilled,
   IconPlayerPlayFilled,
@@ -12,11 +18,15 @@ import {
   IconVolume,
   IconVolumeOff
 } from "@tabler/icons-react";
+import {useAtom} from "jotai";
+import {Howl} from "howler";
 
 export function Player() {
-  const currentSongInst = useAtomValue(currentSongInstance)
-  const currentSongDet = useAtomValue(currentSongDetails)
-
+  const pb = useAtomValue(globalPocketbase)
+  const [currentSongInst, setCurrentSongInst] = useAtom(globalCurrentSongInstance)
+  const [currentSongDet, setCurrentSongDet] = useAtom(globalCurrentSongDetails)
+  const [playlist, setPlaylist] = useAtom(globalSongsPlaylist);
+  const setPlaylistDrawerOpen = useSetAtom(globalPlaylistDrawerOpened)
   const [currentSongProgress, setCurrentSongProgress] = useState("");
   const [currentSongProgressSeconds, setCurrentSongProgressSeconds] = useState(0);
   const [currentSongVolume, setCurrentSongVolume] = useState<number>(100)
@@ -29,6 +39,11 @@ export function Player() {
       setCurrentSongProgress(getSongPercent(currentSongInst))
       setCurrentSongProgressSeconds(Number(getSecondsFromPercentage(currentSongInst.duration(), Number(getSongPercent(currentSongInst))).toFixed(2)))
     }, 100)
+    currentSongInst.on("end", () => {
+      console.log("song end")
+      setCurrentSongInst(undefined)
+      setCurrentSongDet(undefined);
+    })
     play()
     return () => {
       clearInterval(progressInterval);
@@ -37,6 +52,24 @@ export function Player() {
     }
 
   }, [currentSongInst])
+
+  useEffect(() => {
+    if (!currentSongInst) {
+      console.log(playlist)
+      advanceInPlayList()
+    }
+  }, [playlist, currentSongInst])
+
+  function advanceInPlayList() {
+    if (playlist.length === 0) return;
+    const song = playlist[0]
+    const url = pb.getFileUrl(song as never, song.song)
+    setCurrentSongInst(new Howl({
+      src: [url]
+    }))
+    setCurrentSongDet(song)
+    setPlaylist((prev) => prev.filter((s) => s.id !== prev[0].id))
+  }
 
 // Update Volume
   useEffect(() => {
@@ -86,7 +119,9 @@ export function Player() {
       <Stack spacing={0} style={{paddingBottom: "1em"}}>
         <Center inline style={{justifyContent: "space-evenly"}}>
           <Text style={{marginLeft: "0.3em"}}>{secondsToStyledTime(currentSongProgressSeconds)}</Text>
-          <Slider thumbChildren={<IconMusic/>} value={Number(currentSongProgress)} onChangeEnd={seekSong} label={(v) => secondsToStyledTime(getSecondsFromPercentage(currentSongInst?.duration() || 0, v))} color={"green"}
+          <Slider thumbChildren={<IconMusic/>} value={Number(currentSongProgress)} onChangeEnd={seekSong}
+                  label={(v) => secondsToStyledTime(getSecondsFromPercentage(currentSongInst?.duration() || 0, v))}
+                  color={"green"}
                   style={{width: "100%", marginInline: "0.3em"}}/>
           <Text style={{marginRight: "0.3em"}}>{formatTime(currentSongInst?.duration() || 0)}</Text>
         </Center>
@@ -112,12 +147,15 @@ export function Player() {
             <IconPlayerSkipBack/>
           </ActionIcon>
           <ActionIcon onClick={togglePlay} variant={"filled"} radius={"xl"} size={"xl"}>
-            {isPlaying ? <IconPlayerPlayFilled/> : <IconPlayerPauseFilled/>}
+            {!isPlaying ? <IconPlayerPlayFilled/> : <IconPlayerPauseFilled/>}
           </ActionIcon>
           <ActionIcon onClick={togglePlay}>
             <IconPlayerSkipForward/>
           </ActionIcon>
           <Center inline style={{width: "10em", marginRight: "1em"}}>
+            <ActionIcon style={{marginRight: "0.5em"}} onClick={() => setPlaylistDrawerOpen((v) => !v)}>
+              <IconMenu2/>
+            </ActionIcon>
             <ActionIcon onClick={mute}>
               {isMuted ? <IconVolumeOff/> : <IconVolume/>}
             </ActionIcon>
