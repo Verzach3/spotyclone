@@ -1,7 +1,7 @@
 import {useAtomValue} from "jotai/index";
 import {currentSong} from "../globalState.ts";
 import {useEffect, useState} from "react";
-import {formatTime, getSecondsFromPercentage, getSongPercent} from "../util.ts";
+import {formatTime, getSecondsFromPercentage, getSongPercent, secondsToStyledTime} from "../util.ts";
 import {Slider} from "@mantine/core";
 
 export function Player() {
@@ -59,13 +59,6 @@ export function Player() {
         currentSongVal.seek(getSecondsFromPercentage(currentSongVal.duration(), percentage))
     }
 
-    // Dios mio que he hecho T-T
-    function secondsToStyledTime(seconds: number) {
-        return (seconds / 60).toFixed(2).split(".").map((v, i) => {
-            if (i === 0) return v;
-            return Math.trunc(Number(v) * 0.6)
-        }).join(":")
-    }
 
     return (
         <>
