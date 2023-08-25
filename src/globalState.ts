@@ -9,3 +9,5 @@ export const globalCurrentSongInstance = atom<Howl | undefined>(undefined)
 export const globalCurrentSongDetails = atom<Song | undefined>(undefined);
 export const globalPlaylistDrawerOpened = atom<boolean>(false)
 export const globalSongsPlaylist = atom<Song[]>([])
+
+export const globalChangeModel = atom(false)

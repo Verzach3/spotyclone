@@ -1,5 +1,6 @@
-import {useAtomValue, useSetAtom} from "jotai/index";
+import {useAtomValue, useSetAtom} from "jotai";
 import {
+  globalChangeModel,
   globalCurrentSongDetails,
   globalCurrentSongInstance,
   globalPocketbase,
@@ -10,18 +11,18 @@ import Song from "../types/song.ts";
 import {Howl} from "howler";
 import {SongsListSong} from "./SongsListSong.tsx";
 import {Center, Grid} from "@mantine/core";
-import {nanoid} from "nanoid";
 
 export function SongsList() {
   const pb = useAtomValue(globalPocketbase);
   const setPlaylist = useSetAtom(globalSongsPlaylist)
   const setCurrentSongInst = useSetAtom(globalCurrentSongInstance)
   const setCurrentSongDet = useSetAtom(globalCurrentSongDetails)
+  const changeModel = useAtomValue(globalChangeModel)
   const [currentPage,] = useState(1)
   const [songs, setSongs] = useState<Song[]>([]);
   useEffect(() => {
     getSongs()
-  }, [])
+  }, [changeModel])
 
   async function getSongs() {
     const songs = (await pb.collection("songs").getList<Song>(currentPage, 30)).items;
@@ -40,17 +41,9 @@ export function SongsList() {
 
     <Grid grow gutter={"xs"} justify={"flex-start"} align={"stretch"} style={{ paddingBottom: "8%"}}>
       {songs.map((s) =>
-        <Grid.Col span={2}>
-          <Center>
-            <SongsListSong key={nanoid()} song={s} onPlayClick={() => playSong(s)}
-                           onPlaylistAddClick={() => setPlaylist((prev) => [...prev, s])}/>
-          </Center>
-        </Grid.Col>
-      )}
-      {songs.map((s) =>
-        <Grid.Col span={2}>
-          <Center>
-            <SongsListSong key={nanoid()} song={s} onPlayClick={() => playSong(s)}
+        <Grid.Col span={2} key={s.id}>
+          <Center >
+            <SongsListSong  song={s} onPlayClick={() => playSong(s)}
                            onPlaylistAddClick={() => setPlaylist((prev) => [...prev, s])}/>
           </Center>
         </Grid.Col>

@@ -13,9 +13,9 @@ import {
   TextInput
 } from "@mantine/core";
 import {IconPlayerPlayFilled, IconPlaylistAdd, IconSearch, IconUpload} from "@tabler/icons-react";
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {useDebouncedValue} from "@mantine/hooks";
-import {useAtomValue, useSetAtom} from "jotai/index";
+import {useAtomValue, useSetAtom} from "jotai";
 import {
   globalCurrentSongDetails,
   globalCurrentSongInstance,
@@ -26,10 +26,10 @@ import Song from "../types/song.ts";
 import {PlaylistSong} from "./PlaylistSong.tsx";
 import {nanoid} from "nanoid";
 import {Howl} from "howler";
-import {Dropzone} from "@mantine/dropzone";
 import {useForm} from "@mantine/form";
+import {MusicGenres} from "../constants.ts";
 
-export function SearchAffix() {
+export function RightAffix() {
   const [uploadModalOpened, setUploadModalOpened] = useState(false)
   const [searchModalOpened, setSearchModalOpened] = useState(false)
   const [inputVal, setInputVal] = useState("")
@@ -56,11 +56,8 @@ export function SearchAffix() {
     }).then((r) => {
       setResults(r.items)
     })
+    console.log("Model", pb.authStore.model)
   }, [pb, val])
-
-  useEffect(() => {
-    console.log(results)
-  }, [results])
 
   const form = useForm({
     initialValues: {
@@ -72,52 +69,25 @@ export function SearchAffix() {
     },
   });
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    console.log(form.values);
+  const handleSubmit = ( {name, artist, thumbnail, genres, song }:  {name: string, artist: string, thumbnail: null | File , genres: string, song: null | File}) => {
+    console.log(`Values`, name, artist, thumbnail, genres, song);
+    const formData = new FormData();
+
+    formData.append("name", name)
+    formData.append("artist", artist)
+    thumbnail ? formData.append("thumbnail", thumbnail) : console.log("Thumbnail not provided")
+    formData.append("genres", genres)
+    if (!song) {
+      console.error("Song not provided")
+      return
+    }
+    formData.append("song", song)
+    pb.collection("songs").create(formData).then((res) => {
+      console.log(res)
+      form.reset()
+    })
     // Aquí puedes enviar los datos del formulario a tu backend o realizar otras acciones
   };
-
-  const multiSelectData = [
-    {value: 'Pop', label: 'Pop'},
-    {value: 'Rock', label: 'Rock'},
-    {value: 'Hip-hop', label: 'Hip-hop'},
-    {value: 'R&B (Ritmo y Blues)', label: 'R&B (Ritmo y Blues)'},
-    {value: 'Country', label: 'Country'},
-    {value: 'Jazz', label: 'Jazz'},
-    {value: 'Blues', label: 'Blues'},
-    {value: 'Electrónica', label: 'Electrónica'},
-    {value: 'Dance', label: 'Dance'},
-    {value: 'Reggae', label: 'Reggae'},
-    {value: 'Gospel', label: 'Gospel'},
-    {value: 'Alternativo', label: 'Alternativo'},
-    {value: 'Indie', label: 'Indie'},
-    {value: 'Folk', label: 'Folk'},
-    {value: 'Punk', label: 'Punk'},
-    {value: 'Metal', label: 'Metal'},
-    {value: 'Clásica', label: 'Clásica'},
-    {value: 'Soul', label: 'Soul'},
-    {value: 'Funk', label: 'Funk'},
-    {value: 'Disco', label: 'Disco'},
-    {value: 'Ska', label: 'Ska'},
-    {value: 'Rap', label: 'Rap'},
-    {value: 'Grunge', label: 'Grunge'},
-    {value: 'New Wave', label: 'New Wave'},
-    {value: 'Techno', label: 'Techno'},
-    {value: 'House', label: 'House'},
-    {value: 'Dubstep', label: 'Dubstep'},
-    {value: 'Latina', label: 'Latina'},
-    {value: 'Reguetón', label: 'Reguetón'},
-    {value: 'Salsa', label: 'Salsa'},
-    {value: 'Mariachi', label: 'Mariachi'},
-    {value: 'Norteño', label: 'Norteño'},
-    {value: 'Ranchera', label: 'Ranchera'},
-    {value: 'Cumbia', label: 'Cumbia'},
-    {value: 'Vallenato', label: 'Vallenato'},
-    {value: 'Porro', label: 'Porro'},
-    {value: 'Carranga', label: 'Carranga'},
-    {value: 'Corridos', label: 'Corridos'}
-  ];
 
 
   return (
@@ -155,7 +125,7 @@ export function SearchAffix() {
         </Stack>
       </Modal>
       <Modal opened={uploadModalOpened} onClose={() => setUploadModalOpened(false)} withCloseButton={false} >
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
           <TextInput
             label="Name"
             placeholder="Enter the name"
@@ -181,7 +151,7 @@ export function SearchAffix() {
           />
 
           <MultiSelect
-            data={multiSelectData}
+            data={MusicGenres}
             label="Genres"
             placeholder="Enter the genres"
             required
@@ -203,9 +173,11 @@ export function SearchAffix() {
       </Modal>
       <Affix position={{top: rem(10), right: rem(15)}}>
         <Center>
+          {pb.authStore.model &&
           <ActionIcon variant={"filled"} size={"xl"} onClick={() => setUploadModalOpened(true)}>
             <IconUpload/>
           </ActionIcon>
+          }
           <ActionIcon style={{marginLeft: "1em"}} variant={"filled"} size={"xl"}
                       onClick={() => setSearchModalOpened(true)}>
             <IconSearch/>
